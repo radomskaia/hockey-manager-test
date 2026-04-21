@@ -1,9 +1,8 @@
 $tab-padding: 0.5rem 1rem;
 $body-max-height: 11rem;
-$scrollbar-width: 12px;
-$scrollbar-gap-right: 2.5rem;
-$scrollbar-gap-block: 1rem;
-$scrollbar-space: calc(#{$scrollbar-width} + #{$scrollbar-gap-right});
+$scrollbar-gap: 10px;
+$scrollbar-space: calc(#{$scrollbar-gap} + #{$scrollbar-width} + #{$scrollbar-gap-right});
+$scroll-content-padding-y: 1rem;
 $cell-padding-y: 0.5rem;
 $cell-padding-x: 1.5rem;
 $scroll-content-padding-y: 0.8rem;
@@ -28,8 +27,9 @@ $scroll-content-padding-y: 0.8rem;
     border: none;
     background-color: $color-bg;
     color: $color-text-muted;
-    transition: background-color 0.15s,
-    color 0.15s;
+    transition:
+      background-color 0.15s,
+      color 0.15s;
 
     &--active {
       background-color: $color-bg-card;
@@ -99,32 +99,22 @@ $scroll-content-padding-y: 0.8rem;
   }
 
   &__body-shell {
-    padding-block: $scrollbar-gap-block;
-    padding-right: $scrollbar-gap-right;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
+    padding-block:$scroll-content-padding-y;
     background-color: $color-bg-row;
   }
 
   &__body-scroll {
-    padding-block: $scroll-content-padding-y;
+    margin-block: $scroll-content-padding-y;
     max-height: $body-max-height;
     overflow-y: auto;
     overflow-x: hidden;
-    scrollbar-width: thin;
-    scrollbar-color: $color-text #939393;
+    scrollbar-width: none;
 
     &::-webkit-scrollbar {
-      width: $scrollbar-width;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: $color-text;
-      margin-block: 12px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: #939393;
-      border-radius: 0;
-      border: none;
+      display: none;
     }
   }
 
@@ -182,4 +172,5 @@ $scroll-content-padding-y: 0.8rem;
     flex: 0 0 auto;
     white-space: nowrap;
   }
+
 }

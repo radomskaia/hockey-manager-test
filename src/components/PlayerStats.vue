@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 
+import CustomScrollbar from '@/components/CustomScrollbar.vue'
 import { TAB, tabConfigByValue, tabs } from '@/components/PlayerStats.config'
 import type { Tab } from '@/components/PlayerStats.config'
 import { usePlayerStore } from '@/stores/player'
@@ -23,6 +24,10 @@ const store = usePlayerStore()
 const { stats, loading, error } = storeToRefs(store)
 const activeTab = ref<Tab>(TAB.RECENT)
 const { t } = useI18n()
+
+const scrollBodyRef = ref<HTMLElement | null>(null)
+const scrollbarRef = ref<InstanceType<typeof CustomScrollbar> | null>(null)
+const hasVerticalScroll = ref(false)
 
 const activeView = computed(() => {
   const isRecent = activeTab.value === TAB.RECENT
@@ -49,7 +54,10 @@ function getCellValue(row: StatsRecord, key: StatsRowKey): unknown {
 
 function getRowKey(row: StatsRecord, index: number): string | number {
   const key = activeView.value.rowKey
-  if (!key) return index
+
+  if (!key) {
+    return index
+  }
 
   const value = getCellValue(row, key)
 
@@ -76,8 +84,19 @@ function getMatchParts(row: StatsRecord): MatchParts | null {
   }
 }
 
-onMounted(() => {
-  void store.fetchStats()
+watch(
+  () => [activeTab.value, stats.value],
+  async () => {
+    await nextTick()
+    scrollbarRef.value?.update()
+  },
+  { deep: true },
+)
+
+onMounted(async () => {
+  await store.fetchStats()
+  await nextTick()
+  scrollbarRef.value?.update()
 })
 </script>
 
@@ -115,7 +134,10 @@ onMounted(() => {
     >
       <div
         class="stats-table"
-        :style="{ '--stats-grid': activeView.gridTemplate }"
+        :style="{
+          '--stats-grid': activeView.gridTemplate,
+          '--scrollbar-space': hasVerticalScroll ? undefined : '0px',
+        }"
       >
         <div class="stats-table__head">
           <div class="stats-table__head-row">
@@ -127,12 +149,18 @@ onMounted(() => {
               {{ t(col.labelKey) }}
             </div>
 
-            <div class="stats-table__head-spacer" />
+            <div
+              v-if="hasVerticalScroll"
+              class="stats-table__head-spacer"
+            />
           </div>
         </div>
 
         <div class="stats-table__body-shell">
-          <div class="stats-table__body-scroll">
+          <div
+            ref="scrollBodyRef"
+            class="stats-table__body-scroll"
+          >
             <div class="stats-table__body-content">
               <div
                 v-for="(row, index) in activeView.rows"
@@ -172,6 +200,12 @@ onMounted(() => {
               </div>
             </div>
           </div>
+
+          <CustomScrollbar
+            ref="scrollbarRef"
+            :scroll-element="scrollBodyRef"
+            @update:has-scroll="hasVerticalScroll = $event"
+          />
         </div>
       </div>
     </div>
