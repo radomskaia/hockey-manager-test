@@ -90,7 +90,6 @@ watch(
     await nextTick();
     scrollbarRef.value?.update();
   },
-  { deep: true }
 );
 
 async function refresh(): Promise<void> {
@@ -105,9 +104,9 @@ async function handleVisibilityChange(): Promise<void> {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener('visibilitychange', handleVisibilityChange);
-  refresh();
+  await refresh();
 });
 
 onBeforeUnmount(() => {
