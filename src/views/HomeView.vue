@@ -1,43 +1,47 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-import PlayerStats from '@/components/PlayerStats.vue'
-import { LOCALES } from '@/plugins/i18n'
-import type { AppLocale } from '@/plugins/i18n'
-import { THEMES } from '@/plugins/theme'
-import type { AppTheme } from '@/plugins/theme'
+import PlayerStats from '@/components/PlayerStats.vue';
+import { LOCALES } from '@/plugins/i18n';
+import type { AppLocale } from '@/plugins/i18n';
+import { THEMES } from '@/plugins/theme';
+import type { AppTheme } from '@/plugins/theme';
 
-const { locale } = useI18n()
+const { locale } = useI18n();
 
 const nextLocale = computed(() => {
-  const current = LOCALES.indexOf(locale.value as AppLocale)
+  const current = LOCALES.indexOf(locale.value as AppLocale);
 
-  return LOCALES[(current + 1) % LOCALES.length].toUpperCase()
-})
+  return LOCALES[(current + 1) % LOCALES.length].toUpperCase();
+});
 
 function toggleLocale(): void {
-  const current = LOCALES.indexOf(locale.value as AppLocale)
-  locale.value = LOCALES[(current + 1) % LOCALES.length]
+  const current = LOCALES.indexOf(locale.value as AppLocale);
+  locale.value = LOCALES[(current + 1) % LOCALES.length];
 }
 
-const THEME_KEY = 'app-theme'
+const THEME_KEY = 'app-theme';
 
-const theme = ref<AppTheme>((localStorage.getItem(THEME_KEY) as AppTheme | null) ?? THEMES[0])
+const theme = ref<AppTheme>((localStorage.getItem(THEME_KEY) as AppTheme | null) ?? THEMES[0]);
 
 const nextTheme = computed(() => {
-  const current = THEMES.indexOf(theme.value)
+  const current = THEMES.indexOf(theme.value);
 
-  return THEMES[(current + 1) % THEMES.length]
-})
+  return THEMES[(current + 1) % THEMES.length];
+});
 
-watch(theme, (t) => {
-  document.documentElement.dataset.theme = t
-  localStorage.setItem(THEME_KEY, t)
-}, { immediate: true })
+watch(
+  theme,
+  (t) => {
+    document.documentElement.dataset.theme = t;
+    localStorage.setItem(THEME_KEY, t);
+  },
+  { immediate: true }
+);
 
 function toggleTheme(): void {
-  theme.value = nextTheme.value
+  theme.value = nextTheme.value;
 }
 </script>
 
@@ -84,7 +88,9 @@ function toggleTheme(): void {
     border-radius: var(--border-radius);
     padding: 0.25rem 0.75rem;
     cursor: pointer;
-    transition: color 0.15s, border-color 0.15s;
+    transition:
+      color 0.15s,
+      border-color 0.15s;
 
     &:hover {
       color: $color-primary;

@@ -22,4 +22,4 @@ export const en = {
     loading: 'Loading...',
     error: 'Failed to load stats',
   },
-}
+};

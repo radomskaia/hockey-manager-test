@@ -1,118 +1,118 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
-import { storeToRefs } from 'pinia'
-import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
 
-import CustomScrollbar from '@/components/CustomScrollbar.vue'
-import { TAB, tabConfigByValue, tabs } from '@/components/PlayerStats.config'
-import type { Tab } from '@/components/PlayerStats.config'
-import { usePlayerStore } from '@/stores/player'
-import type { StatsRowKey } from '@/types/player'
+import CustomScrollbar from '@/components/CustomScrollbar.vue';
+import { TAB, tabConfigByValue, tabs } from '@/components/PlayerStats.config';
+import type { Tab } from '@/components/PlayerStats.config';
+import { usePlayerStore } from '@/stores/player';
+import type { StatsRowKey } from '@/types/player';
 
-type StatsRecord = Partial<Record<StatsRowKey, unknown>>
+type StatsRecord = Partial<Record<StatsRowKey, unknown>>;
 
 type MatchParts = {
-  home: string
-  score: string
-  away: string
-}
+  home: string;
+  score: string;
+  away: string;
+};
 
-type ProcessedRow = StatsRecord & { matchParts: MatchParts | null }
+type ProcessedRow = StatsRecord & { matchParts: MatchParts | null };
 
-const store = usePlayerStore()
-const { stats, loading, error } = storeToRefs(store)
-const activeTab = ref<Tab>(TAB.RECENT)
-const { t } = useI18n()
+const store = usePlayerStore();
+const { stats, loading, error } = storeToRefs(store);
+const activeTab = ref<Tab>(TAB.RECENT);
+const { t } = useI18n();
 
-const scrollBodyRef = ref<HTMLElement | null>(null)
-const scrollbarRef = ref<InstanceType<typeof CustomScrollbar> | null>(null)
-const hasVerticalScroll = ref(false)
+const scrollBodyRef = ref<HTMLElement | null>(null);
+const scrollbarRef = ref<InstanceType<typeof CustomScrollbar> | null>(null);
+const hasVerticalScroll = ref(false);
 
 const activeView = computed(() => {
-  const isRecent = activeTab.value === TAB.RECENT
-  const rawRows = isRecent ? (stats.value?.recent_games ?? []) : (stats.value?.seasonStats ?? [])
+  const isRecent = activeTab.value === TAB.RECENT;
+  const rawRows = isRecent ? (stats.value?.recent_games ?? []) : (stats.value?.seasonStats ?? []);
 
-  const config = tabConfigByValue[activeTab.value]
+  const config = tabConfigByValue[activeTab.value];
 
   const rows: ProcessedRow[] = rawRows.map((row) => ({
     ...row,
     matchParts: isRecent ? getMatchParts(row) : null,
-  }))
+  }));
 
   return {
     columns: config.columns,
     rows,
     rowKey: config.rowKey ?? null,
     gridTemplate: config.gridTemplate,
-  }
-})
+  };
+});
 
 function getCellValue(row: StatsRecord, key: StatsRowKey): unknown {
-  return row[key]
+  return row[key];
 }
 
 function getRowKey(row: StatsRecord, index: number): string | number {
-  const key = activeView.value.rowKey
+  const key = activeView.value.rowKey;
 
   if (!key) {
-    return index
+    return index;
   }
 
-  const value = getCellValue(row, key)
+  const value = getCellValue(row, key);
 
-  return value == null || value === '' ? index : String(value)
+  return value == null || value === '' ? index : String(value);
 }
 
 function getMatchParts(row: StatsRecord): MatchParts | null {
-  const raw = getCellValue(row, 'match')
+  const raw = getCellValue(row, 'match');
 
   if (typeof raw !== 'string') {
-    return null
+    return null;
   }
 
-  const match = raw.match(/^(.*?)\s+(\d+:\d+)\s+(.*)$/u)
+  const match = raw.match(/^(.*?)\s+(\d+:\d+)\s+(.*)$/u);
 
   if (!match) {
-    return null
+    return null;
   }
 
   return {
     home: match[1].trim(),
     score: match[2].trim(),
     away: match[3].trim(),
-  }
+  };
 }
 
 watch(
   () => [activeTab.value, stats.value],
   async () => {
-    await nextTick()
-    scrollbarRef.value?.update()
+    await nextTick();
+    scrollbarRef.value?.update();
   },
-  { deep: true },
-)
+  { deep: true }
+);
 
 async function refresh(): Promise<void> {
-  await store.fetchStats()
-  await nextTick()
-  scrollbarRef.value?.update()
+  await store.fetchStats();
+  await nextTick();
+  scrollbarRef.value?.update();
 }
 
 async function handleVisibilityChange(): Promise<void> {
   if (document.visibilityState === 'visible') {
-    await refresh()
+    await refresh();
   }
 }
 
 onMounted(() => {
-  document.addEventListener('visibilitychange', handleVisibilityChange)
-  refresh()
-})
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  refresh();
+});
 
 onBeforeUnmount(() => {
-  document.removeEventListener('visibilitychange', handleVisibilityChange)
-})
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
+});
 </script>
 
 <template>

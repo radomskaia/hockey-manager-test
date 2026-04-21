@@ -30,8 +30,9 @@
     border: none;
     background-color: $color-bg;
     color: $color-text-muted;
-    transition: background-color 0.15s,
-    color 0.15s;
+    transition:
+      background-color 0.15s,
+      color 0.15s;
 
     &--active {
       background-color: $color-bg-card;
@@ -63,7 +64,9 @@
 }
 
 .stats-table {
-  --scrollbar-space: calc(var(--scrollbar-gap) + var(--scrollbar-width) + var(--scrollbar-gap-right));
+  --scrollbar-space: calc(
+    var(--scrollbar-gap) + var(--scrollbar-width) + var(--scrollbar-gap-right)
+  );
 
   width: 100%;
   min-width: 0;
@@ -86,7 +89,7 @@
       position: relative;
 
       &:before {
-        content: "";
+        content: '';
         border: 1px solid $color-accent;
         position: absolute;
         height: 15rem;
@@ -208,9 +211,8 @@
       width: max-content;
 
       &:not(:first-child) {
-        border-left:2px solid $color-accent;
+        border-left: 2px solid $color-accent;
       }
-
     }
 
     &__cell {

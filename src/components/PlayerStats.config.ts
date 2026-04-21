@@ -1,8 +1,8 @@
-import type { Tab, TabConfig } from '@/types/playerStats'
-import { TAB } from '@/types/playerStats'
+import type { Tab, TabConfig } from '@/types/playerStats';
+import { TAB } from '@/types/playerStats';
 
-export { TAB } from '@/types/playerStats'
-export type { Column, Tab, TabConfig } from '@/types/playerStats'
+export { TAB } from '@/types/playerStats';
+export type { Column, Tab, TabConfig } from '@/types/playerStats';
 
 export const tabConfigByValue: Record<Tab, TabConfig> = {
   [TAB.RECENT]: {
@@ -38,6 +38,6 @@ export const tabConfigByValue: Record<Tab, TabConfig> = {
       { key: 'ice_time', labelKey: 'col.iceTime' },
     ],
   },
-}
+};
 
-export const tabs = Object.values(tabConfigByValue)
+export const tabs = Object.values(tabConfigByValue);

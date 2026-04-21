@@ -1,9 +1,10 @@
 // Typography
-$font-family-base: 'Rubik',
-system-ui,
--apple-system,
-'Segoe UI',
-sans-serif;
+$font-family-base:
+  'Rubik',
+  system-ui,
+  -apple-system,
+  'Segoe UI',
+  sans-serif;
 $font-family-table: 'IBM Plex Sans', sans-serif;
 
 $font-weight-regular: 400;
@@ -38,7 +39,7 @@ $font-size-lg: 2rem;
   --color-scrollbar-thumb-hover: #111111;
 }
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   --color-bg-row: #1a1b24;
   --color-bg-row-alt: #1e1f29;
   --color-bg-card: #252633;
