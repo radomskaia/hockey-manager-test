@@ -4,12 +4,23 @@ import { ref } from 'vue'
 import type { PlayerStatsResponse } from '@/types/player'
 import { isPlayerStatsResponse } from '@/utils/validators'
 
+const STATS_TTL_MS = 10 * 60 * 1000
+
 export const usePlayerStore = defineStore('player', () => {
   const stats = ref<PlayerStatsResponse | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const lastFetched = ref<number | null>(null)
 
-  async function fetchStats() {
+  function isStale(): boolean {
+    return lastFetched.value === null || Date.now() - lastFetched.value > STATS_TTL_MS
+  }
+
+  async function fetchStats({ force = false } = {}): Promise<void> {
+    if (!force && !isStale()) {
+        return
+    }
+
     loading.value = true
     error.value = null
 
@@ -19,6 +30,7 @@ export const usePlayerStore = defineStore('player', () => {
 
       if (response.ok && isPlayerStatsResponse(json)) {
         stats.value = json
+        lastFetched.value = Date.now()
       } else {
         error.value = 'state.error'
       }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
@@ -93,10 +93,25 @@ watch(
   { deep: true },
 )
 
-onMounted(async () => {
+async function refresh(): Promise<void> {
   await store.fetchStats()
   await nextTick()
   scrollbarRef.value?.update()
+}
+
+async function handleVisibilityChange(): Promise<void> {
+  if (document.visibilityState === 'visible') {
+    await refresh()
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+  refresh()
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 </script>
 
