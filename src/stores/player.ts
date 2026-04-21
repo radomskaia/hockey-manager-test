@@ -25,7 +25,7 @@ export const usePlayerStore = defineStore('player', () => {
     error.value = null;
 
     try {
-      const response = await fetch('/mock_response.json');
+      const response = await fetch(`${import.meta.env.BASE_URL}mock_response.json`);
       const json: unknown = await response.json();
 
       if (response.ok && isPlayerStatsResponse(json)) {
