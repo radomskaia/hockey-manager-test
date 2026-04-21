@@ -1,0 +1,134 @@
+$tab-padding: 0.5rem 1rem;
+$body-max-height: 16.5rem;
+$scrollbar-width: 11px;
+$cell-padding: 0.5rem 3.375rem;
+$th-padding-block: 1rem;
+$row-edge-padding: 1.875rem;
+$col-match-min-width: 160px;
+
+.player-stats {
+  overflow: hidden;
+  width: 100%;
+
+  &__tabs {
+    display: flex;
+    align-items: stretch;
+  }
+
+  &__tab {
+    -moz-border-radius-topleft: $border-radius;
+    -moz-border-radius-topright: $border-radius;
+    border-top-left-radius: $border-radius;
+    border-top-right-radius: $border-radius;
+    padding: $tab-padding;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background-color: $color-bg;
+    color: $color-text-muted;
+    transition:
+      background-color 0.15s,
+      color 0.15s;
+
+    &--active {
+      background-color: $color-bg-card;
+      color: $color-text-on-card;
+      cursor: auto;
+    }
+
+    &:not(&--active):hover {
+      background-color: $color-bg-row-alt;
+      color: $color-text;
+    }
+  }
+
+  &__body {
+    max-height: $body-max-height;
+    overflow-y: auto;
+    overflow-x: auto;
+
+    &::-webkit-scrollbar {
+      width: $scrollbar-width;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: $color-bg-card;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: $color-bg;
+      border-radius: 2px;
+    }
+  }
+
+  &__state {
+    padding: 1.5rem;
+    text-align: center;
+    color: $color-text-muted;
+    font-size: $font-size-base;
+
+    &--error {
+      color: $color-error;
+    }
+  }
+}
+
+.stats-table {
+  font-family: $font-family-table;
+  font-weight: $font-weight-regular;
+  font-size: $font-size-md;
+  color: $color-text;
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap;
+
+  thead tr {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: $color-accent;
+    color: $color-text-on-accent;
+  }
+
+  th,
+  td {
+    padding: $cell-padding;
+    text-align: center;
+  }
+
+  th {
+    font-weight: $font-weight-bold;
+    padding-block: $th-padding-block;
+    font-size: $font-size-md;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  tbody tr {
+    background-color: $color-bg-row;
+
+    &:first-child td {
+      padding-top: $row-edge-padding;
+    }
+
+    &:last-child td {
+      padding-bottom: $row-edge-padding;
+    }
+
+    &:nth-child(even) {
+      background-color: $color-bg-row-alt;
+    }
+  }
+
+  td {
+    color: $color-text;
+    border-right: 2px solid $color-accent;
+  }
+
+  &__col--left {
+    text-align: left;
+    min-width: $col-match-min-width;
+  }
+}
