@@ -1,38 +1,30 @@
-# hockey-manager-test
+# Hockey Manager — Test Assignment
 
-This template should help get you started developing with Vue 3 in Vite.
+Test assignment: implement a player stats component based on a design mockup.
 
-## Recommended IDE Setup
+**Live demo:** https://radomskaia.github.io/hockey-maneger-test/
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Stack
 
-## Recommended Browser Setup
+- Vue 3 (Composition API)
+- TypeScript
+- Pinia
+- Vue Router
+- Vue i18n
+- SCSS
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## Features
 
-## Customize configuration
+- Player stats table with two tabs: recent games and season history
+- Custom scrollbar (vertical and horizontal)
+- Responsive layout including a transposed mobile table view
+- Language toggle (RU / EN)
+- Theme toggle (light / dark)
+- TTL-based data caching with refresh on browser tab visibility change
 
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
+## Getting started
 
 ```sh
 npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
 npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
 ```
