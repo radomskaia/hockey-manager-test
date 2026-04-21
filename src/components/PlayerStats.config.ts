@@ -8,6 +8,7 @@ export const tabConfigByValue: Record<Tab, TabConfig> = {
   [TAB.RECENT]: {
     value: TAB.RECENT,
     labelKey: 'tabs.recentGames',
+    gridTemplate: 'minmax(22rem, 2.4fr) repeat(8, minmax(5.5rem, 1fr))',
     columns: [
       { key: 'match', labelKey: 'col.match', align: 'left' },
       { key: 'G', labelKey: 'col.goals' },
@@ -24,6 +25,7 @@ export const tabConfigByValue: Record<Tab, TabConfig> = {
     value: TAB.HISTORY,
     labelKey: 'tabs.history',
     rowKey: 'season',
+    gridTemplate: 'minmax(5rem, 0.8fr) minmax(10rem, 1.4fr) repeat(7, minmax(5.5rem, 1fr))',
     columns: [
       { key: 'season', labelKey: 'col.season' },
       { key: 'team', labelKey: 'col.team', align: 'left' },

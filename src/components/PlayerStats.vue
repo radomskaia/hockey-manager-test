@@ -11,6 +11,14 @@ import type { StatsRowKey } from '@/types/player'
 
 type StatsRecord = Partial<Record<StatsRowKey, unknown>>
 
+type MatchParts = {
+  home: string
+  score: string
+  away: string
+}
+
+type ProcessedRow = StatsRecord & { matchParts: MatchParts | null }
+
 const store = usePlayerStore()
 const { stats, loading, error } = storeToRefs(store)
 const activeTab = ref<Tab>(TAB.RECENT)
@@ -22,10 +30,16 @@ const activeView = computed(() => {
 
   const config = tabConfigByValue[activeTab.value]
 
+  const rows: ProcessedRow[] = rawRows.map((row) => ({
+    ...row,
+    matchParts: isRecent ? getMatchParts(row) : null,
+  }))
+
   return {
     columns: config.columns,
-    rows: rawRows,
+    rows,
     rowKey: config.rowKey ?? null,
+    gridTemplate: config.gridTemplate,
   }
 })
 
@@ -40,6 +54,26 @@ function getRowKey(row: StatsRecord, index: number): string | number {
   const value = getCellValue(row, key)
 
   return value == null || value === '' ? index : String(value)
+}
+
+function getMatchParts(row: StatsRecord): MatchParts | null {
+  const raw = getCellValue(row, 'match')
+
+  if (typeof raw !== 'string') {
+    return null
+  }
+
+  const match = raw.match(/^(.*?)\s+(\d+:\d+)\s+(.*)$/u)
+
+  if (!match) {
+    return null
+  }
+
+  return {
+    home: match[1].trim(),
+    score: match[2].trim(),
+    away: match[3].trim(),
+  }
 }
 
 onMounted(() => {
@@ -79,35 +113,69 @@ onMounted(() => {
       v-else-if="stats"
       class="player-stats__body"
     >
-      <table class="stats-table">
-        <thead>
-          <tr>
-            <th
+      <div
+        class="stats-table"
+        :style="{ '--stats-grid': activeView.gridTemplate }"
+      >
+        <div class="stats-table__head">
+          <div class="stats-table__head-row">
+            <div
               v-for="col in activeView.columns"
               :key="col.key"
-              :class="{ 'stats-table__col--left': col.align === 'left' }"
+              class="stats-table__cell stats-table__cell--head"
             >
               {{ t(col.labelKey) }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(row, index) in activeView.rows"
-            :key="getRowKey(row, index)"
-          >
-            <td
-              v-for="col in activeView.columns"
-              :key="col.key"
-              :class="{ 'stats-table__col--left': col.align === 'left' }"
-            >
-              {{ getCellValue(row, col.key) }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </div>
+
+            <div class="stats-table__head-spacer" />
+          </div>
+        </div>
+
+        <div class="stats-table__body-shell">
+          <div class="stats-table__body-scroll">
+            <div class="stats-table__body-content">
+              <div
+                v-for="(row, index) in activeView.rows"
+                :key="getRowKey(row, index)"
+                class="stats-table__body-row"
+              >
+                <div
+                  v-for="col in activeView.columns"
+                  :key="col.key"
+                  class="stats-table__cell"
+                >
+                  <template v-if="col.key === 'match'">
+                    <div
+                      v-if="row.matchParts"
+                      class="stats-table__match"
+                    >
+                      <span class="stats-table__match-team stats-table__match-team--right">
+                        {{ row.matchParts.home }}
+                      </span>
+                      <span class="stats-table__match-score">
+                        {{ row.matchParts.score }}
+                      </span>
+                      <span class="stats-table__match-team">
+                        {{ row.matchParts.away }}
+                      </span>
+                    </div>
+
+                    <template v-else>
+                      {{ getCellValue(row, col.key) }}
+                    </template>
+                  </template>
+
+                  <template v-else>
+                    {{ getCellValue(row, col.key) }}
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
-<style scoped lang="scss" src="./PlayerStats.scss"></style>
+<style lang="scss" src="./PlayerStats.scss"></style>

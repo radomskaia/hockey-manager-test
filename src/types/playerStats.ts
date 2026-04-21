@@ -18,4 +18,5 @@ export interface TabConfig {
   labelKey: string
   rowKey?: StatsRowKey
   columns: Column[]
+  gridTemplate: string
 }

@@ -1,10 +1,12 @@
 $tab-padding: 0.5rem 1rem;
-$body-max-height: 16.5rem;
-$scrollbar-width: 11px;
-$cell-padding: 0.5rem 3.375rem;
-$th-padding-block: 1rem;
-$row-edge-padding: 1.875rem;
-$col-match-min-width: 160px;
+$body-max-height: 11rem;
+$scrollbar-width: 12px;
+$scrollbar-gap-right: 2.5rem;
+$scrollbar-gap-block: 1rem;
+$scrollbar-space: calc(#{$scrollbar-width} + #{$scrollbar-gap-right});
+$cell-padding-y: 0.5rem;
+$cell-padding-x: 1.5rem;
+$scroll-content-padding-y: 0.8rem;
 
 .player-stats {
   overflow: hidden;
@@ -16,8 +18,6 @@ $col-match-min-width: 160px;
   }
 
   &__tab {
-    -moz-border-radius-topleft: $border-radius;
-    -moz-border-radius-topright: $border-radius;
     border-top-left-radius: $border-radius;
     border-top-right-radius: $border-radius;
     padding: $tab-padding;
@@ -28,9 +28,8 @@ $col-match-min-width: 160px;
     border: none;
     background-color: $color-bg;
     color: $color-text-muted;
-    transition:
-      background-color 0.15s,
-      color 0.15s;
+    transition: background-color 0.15s,
+    color 0.15s;
 
     &--active {
       background-color: $color-bg-card;
@@ -45,22 +44,8 @@ $col-match-min-width: 160px;
   }
 
   &__body {
-    max-height: $body-max-height;
-    overflow-y: auto;
-    overflow-x: auto;
-
-    &::-webkit-scrollbar {
-      width: $scrollbar-width;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: $color-bg-card;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: $color-bg;
-      border-radius: 2px;
-    }
+    overflow: hidden;
+    border: 1px solid $color-bg;
   }
 
   &__state {
@@ -76,59 +61,125 @@ $col-match-min-width: 160px;
 }
 
 .stats-table {
+  --scrollbar-space: #{$scrollbar-space};
+
+  width: 100%;
+  min-width: 0;
   font-family: $font-family-table;
   font-weight: $font-weight-regular;
   font-size: $font-size-md;
   color: $color-text;
-  width: 100%;
-  border-collapse: collapse;
-  white-space: nowrap;
 
-  thead tr {
-    position: sticky;
-    top: 0;
-    z-index: 1;
+  &__head {
     background-color: $color-accent;
     color: $color-text-on-accent;
   }
 
-  th,
-  td {
-    padding: $cell-padding;
-    text-align: center;
+  &__head-row {
+    display: grid;
+    grid-template-columns: var(--stats-grid) var(--scrollbar-space);
+    min-height: 3.5rem;
+
+    & > .stats-table__cell--head:not(:first-child) {
+      position: relative;
+
+      &:before {
+        content: "";
+        border: 1px solid $color-accent;
+        position: absolute;
+        height: 14rem;
+        top: 3.5rem;
+        left: 0;
+      }
+    }
   }
 
-  th {
-    font-weight: $font-weight-bold;
-    padding-block: $th-padding-block;
-    font-size: $font-size-md;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
+  &__head-spacer {
+    background-color: $color-accent;
   }
 
-  tbody tr {
+  &__body-shell {
+    padding-block: $scrollbar-gap-block;
+    padding-right: $scrollbar-gap-right;
     background-color: $color-bg-row;
+  }
 
-    &:first-child td {
-      padding-top: $row-edge-padding;
+  &__body-scroll {
+    padding-block: $scroll-content-padding-y;
+    max-height: $body-max-height;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: $color-text #939393;
+
+    &::-webkit-scrollbar {
+      width: $scrollbar-width;
     }
 
-    &:last-child td {
-      padding-bottom: $row-edge-padding;
+    &::-webkit-scrollbar-track {
+      background: $color-text;
+      margin-block: 12px;
     }
+
+    &::-webkit-scrollbar-thumb {
+      background: #939393;
+      border-radius: 0;
+      border: none;
+    }
+  }
+
+  &__body-row {
+    display: grid;
+    grid-template-columns: var(--stats-grid);
+    align-items: stretch;
+    min-width: 0;
+    background-color: $color-bg-row;
 
     &:nth-child(even) {
       background-color: $color-bg-row-alt;
     }
   }
 
-  td {
-    color: $color-text;
-    border-right: 2px solid $color-accent;
+  &__cell {
+    min-width: 0;
+    padding: $cell-padding-y $cell-padding-x;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    &--head {
+      font-weight: $font-weight-bold;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: $color-text-on-accent;
+    }
   }
 
-  &__col--left {
+
+  &__match {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(1rem, 3vw, 3.5rem);
+    width: 100%;
+    min-width: 0;
+  }
+
+  &__match-team {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     text-align: left;
-    min-width: $col-match-min-width;
+
+    &--right {
+      text-align: right;
+    }
+  }
+
+  &__match-score {
+    flex: 0 0 auto;
+    white-space: nowrap;
   }
 }
