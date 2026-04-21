@@ -1,9 +1,36 @@
+// Typography
 $font-family-base:
-  'Inter',
+  'Rubik',
   system-ui,
   -apple-system,
   'Segoe UI',
   sans-serif;
-$color-text: #1b1b1f;
-$color-bg: #ffffff;
-$color-primary: #1d4ed8;
+$font-family-table: 'IBM Plex Sans', sans-serif;
+
+$font-weight-regular: 400;
+$font-weight-bold: 600;
+
+$font-size-base: 1rem;
+$font-size-sm: 0.875rem;
+$font-size-md: 1.25rem;
+$font-size-lg: 2rem;
+
+// Border
+$border-radius: 10px;
+
+// Colors — background
+$color-bg: #13141a;
+$color-bg-card: #3a3a3a;
+$color-bg-row: #fff;
+$color-bg-row-alt: rgba(255, 255, 255, 0.95);
+
+// Colors — text
+$color-text: #1f1f1f;
+$color-text-muted: rgba(255, 255, 255, 0.5);
+$color-text-on-accent: #0d1117;
+$color-text-on-card: #fff;
+
+// Colors — accent & semantic
+$color-accent: #00f8fe;
+$color-primary: #00f8fe;
+$color-error: #f87171;
