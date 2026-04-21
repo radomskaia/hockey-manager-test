@@ -45,6 +45,7 @@ const activeView = computed(() => {
     rows,
     rowKey: config.rowKey ?? null,
     gridTemplate: config.gridTemplate,
+    dividers: config.dividers ?? false,
   };
 });
 
@@ -89,7 +90,7 @@ watch(
   async () => {
     await nextTick();
     scrollbarRef.value?.update();
-  },
+  }
 );
 
 async function refresh(): Promise<void> {
@@ -148,6 +149,7 @@ onBeforeUnmount(() => {
     >
       <div
         class="stats-table"
+        :class="{ 'stats-table--dividers': activeView.dividers }"
         :style="{
           '--stats-grid': activeView.gridTemplate,
           '--scrollbar-space': hasVerticalScroll ? undefined : '0px',

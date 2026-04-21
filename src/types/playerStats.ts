@@ -19,4 +19,5 @@ export interface TabConfig {
   rowKey?: StatsRowKey;
   columns: Column[];
   gridTemplate: string;
+  dividers?: boolean;
 }

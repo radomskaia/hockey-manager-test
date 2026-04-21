@@ -84,18 +84,18 @@
     display: grid;
     grid-template-columns: var(--stats-grid) var(--scrollbar-space);
     min-height: 3.5rem;
+  }
 
-    & > .stats-table__cell--head:not(:first-child) {
-      position: relative;
+  &--dividers &__head-row > &__cell--head:not(:first-child) {
+    position: relative;
 
-      &:before {
-        content: '';
-        border: 1px solid $color-accent;
-        position: absolute;
-        height: 15rem;
-        top: 3.5rem;
-        left: 0;
-      }
+    &::before {
+      content: '';
+      border: 1px solid $color-accent;
+      position: absolute;
+      height: 15rem;
+      top: 3.5rem;
+      left: 0;
     }
   }
 
@@ -209,10 +209,10 @@
       display: flex;
       flex-direction: column;
       width: max-content;
+    }
 
-      &:not(:first-child) {
-        border-left: 2px solid $color-accent;
-      }
+    &--dividers &__body-row:not(:first-child) {
+      border-left: 2px solid $color-accent;
     }
 
     &__cell {

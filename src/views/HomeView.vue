@@ -23,7 +23,7 @@ function toggleLocale(): void {
 
 const THEME_KEY = 'app-theme';
 
-const stored = localStorage.getItem(THEME_KEY)
+const stored = localStorage.getItem(THEME_KEY);
 const theme = ref<AppTheme>(THEMES.includes(stored as AppTheme) ? (stored as AppTheme) : THEMES[0]);
 
 const nextTheme = computed(() => {
