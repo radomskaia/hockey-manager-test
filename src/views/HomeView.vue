@@ -12,6 +12,6 @@ import PlayerStats from '@/components/PlayerStats.vue'
 .home-view {
   max-width: 94rem;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 2.5rem 1.25rem;
 }
 </style>

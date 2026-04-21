@@ -1,13 +1,16 @@
-$tab-padding: 0.5rem 1rem;
-$body-max-height: 11rem;
-$scrollbar-gap: 10px;
-$scrollbar-space: calc(#{$scrollbar-gap} + #{$scrollbar-width} + #{$scrollbar-gap-right});
-$scroll-content-padding-y: 1rem;
-$cell-padding-y: 0.5rem;
-$cell-padding-x: 1.5rem;
-$scroll-content-padding-y: 0.8rem;
-
 .player-stats {
+  --tab-padding: 0.5rem 1rem;
+  --scroll-content-padding-y: 0.8rem;
+  --cell-padding-y: 0.5rem;
+  --cell-padding-x: 1.5rem;
+  --body-max-height: 11rem;
+  --scrollbar-gap: 0.625rem;
+  --mobile-cell-height: 2.8rem;
+
+  @media (max-width: 45rem) {
+    --cell-padding-x: 0.5rem;
+  }
+
   overflow: hidden;
   width: 100%;
 
@@ -17,9 +20,9 @@ $scroll-content-padding-y: 0.8rem;
   }
 
   &__tab {
-    border-top-left-radius: $border-radius;
-    border-top-right-radius: $border-radius;
-    padding: $tab-padding;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+    padding: var(--tab-padding);
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
     font-family: inherit;
@@ -27,9 +30,8 @@ $scroll-content-padding-y: 0.8rem;
     border: none;
     background-color: $color-bg;
     color: $color-text-muted;
-    transition:
-      background-color 0.15s,
-      color 0.15s;
+    transition: background-color 0.15s,
+    color 0.15s;
 
     &--active {
       background-color: $color-bg-card;
@@ -61,7 +63,7 @@ $scroll-content-padding-y: 0.8rem;
 }
 
 .stats-table {
-  --scrollbar-space: #{$scrollbar-space};
+  --scrollbar-space: calc(var(--scrollbar-gap) + var(--scrollbar-width) + var(--scrollbar-gap-right));
 
   width: 100%;
   min-width: 0;
@@ -87,7 +89,7 @@ $scroll-content-padding-y: 0.8rem;
         content: "";
         border: 1px solid $color-accent;
         position: absolute;
-        height: 14rem;
+        height: 15rem;
         top: 3.5rem;
         left: 0;
       }
@@ -101,14 +103,15 @@ $scroll-content-padding-y: 0.8rem;
   &__body-shell {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: var(--scrollbar-gap);
     align-items: stretch;
-    padding-block:$scroll-content-padding-y;
+    padding-block: var(--scroll-content-padding-y);
     background-color: $color-bg-row;
   }
 
   &__body-scroll {
-    margin-block: $scroll-content-padding-y;
-    max-height: $body-max-height;
+    margin-block: var(--scroll-content-padding-y);
+    max-height: var(--body-max-height);
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
@@ -132,7 +135,7 @@ $scroll-content-padding-y: 0.8rem;
 
   &__cell {
     min-width: 0;
-    padding: $cell-padding-y $cell-padding-x;
+    padding: var(--cell-padding-y) var(--cell-padding-x);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -146,6 +149,75 @@ $scroll-content-padding-y: 0.8rem;
     }
   }
 
+  @media (max-width: 32rem) {
+    --scrollbar-space: 0px;
+    --cell-padding-x: 1.5rem;
+
+    display: flex;
+    align-items: stretch;
+    width: fit-content;
+    max-width: 100%;
+
+    &__head {
+      flex-shrink: 0;
+    }
+
+    &__head-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: unset;
+
+      & > .stats-table__cell--head:not(:first-child)::before {
+        display: none;
+      }
+    }
+
+    &__head-spacer {
+      display: none;
+    }
+
+    &__cell--head {
+      height: var(--mobile-cell-height);
+      white-space: nowrap;
+    }
+
+    &__body-shell {
+      display: block;
+      padding-block: 0;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    &__body-scroll {
+      display: flex;
+      max-height: unset;
+      overflow-x: auto;
+      overflow-y: hidden;
+      margin-block: 0;
+    }
+
+    &__body-content {
+      display: flex;
+    }
+
+    &__body-row {
+      display: flex;
+      flex-direction: column;
+      width: max-content;
+
+      &:not(:first-child) {
+        border-left:2px solid $color-accent;
+      }
+
+    }
+
+    &__cell {
+      height: var(--mobile-cell-height);
+      white-space: nowrap;
+    }
+  }
 
   &__match {
     display: grid;
@@ -172,5 +244,4 @@ $scroll-content-padding-y: 0.8rem;
     flex: 0 0 auto;
     white-space: nowrap;
   }
-
 }

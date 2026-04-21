@@ -206,6 +206,10 @@ onMounted(async () => {
             :scroll-element="scrollBodyRef"
             @update:has-scroll="hasVerticalScroll = $event"
           />
+          <CustomScrollbar
+            direction="horizontal"
+            :scroll-element="scrollBodyRef"
+          />
         </div>
       </div>
     </div>

@@ -1,49 +1,111 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 const trackRef = ref<HTMLElement | null>(null)
 
 const props = defineProps<{
   scrollElement: HTMLElement | null
+  direction?: 'vertical' | 'horizontal'
 }>()
 
 const emit = defineEmits<{
   'update:hasScroll': [value: boolean]
 }>()
 
-const MIN_THUMB_HEIGHT = 54
+type AxisConfig = {
+  scrollPos: 'scrollTop' | 'scrollLeft'
+  scrollSize: 'scrollHeight' | 'scrollWidth'
+  clientSize: 'clientHeight' | 'clientWidth'
+  mouseCoord: 'clientX' | 'clientY'
+  rectStart: 'top' | 'left'
+  rectSize: 'height' | 'width'
+  transform: 'translateY' | 'translateX'
+  thumbDim: 'height' | 'width'
+}
 
-const thumbTop = ref(0)
-const thumbHeight = ref(0)
+const AXIS: Record<'vertical' | 'horizontal', AxisConfig> = {
+  vertical: {
+    scrollPos: 'scrollTop',
+    scrollSize: 'scrollHeight',
+    clientSize: 'clientHeight',
+    mouseCoord: 'clientY',
+    rectStart: 'top',
+    rectSize: 'height',
+    transform: 'translateY',
+    thumbDim: 'height',
+  },
+  horizontal: {
+    scrollPos: 'scrollLeft',
+    scrollSize: 'scrollWidth',
+    clientSize: 'clientWidth',
+    mouseCoord: 'clientX',
+    rectStart: 'left',
+    rectSize: 'width',
+    transform: 'translateX',
+    thumbDim: 'width',
+  },
+}
+
+const axis = computed(() => AXIS[props.direction ?? 'vertical'])
+
+const MIN_THUMB_SIZE = 54
+
+const thumbPos = ref(0)
+const thumbSize = ref(0)
 const hasScroll = ref(false)
 const isDragging = ref(false)
 
-let dragStartY = 0
-let dragStartScrollTop = 0
+let dragStart = 0
+let dragStartScroll = 0
 let scrollResizeObserver: ResizeObserver | null = null
 let trackResizeObserver: ResizeObserver | null = null
 
-function setHasScroll(value: boolean): void {
-  if (hasScroll.value === value) {
-    return
-  }
+type Metrics = {
+  scrollPos: number
+  scrollSize: number
+  clientSize: number
+  trackSize: number
+  maxScroll: number
+}
 
+function getTrackSize(track: HTMLElement | null, element: HTMLElement, config: AxisConfig): number {
+  return track?.[config.clientSize] ?? element[config.clientSize]
+}
+
+function getMetrics(element: HTMLElement, config: AxisConfig, trackSize: number): Metrics {
+  const scrollPos = element[config.scrollPos]
+  const scrollSize = element[config.scrollSize]
+  const clientSize = element[config.clientSize]
+
+  return { scrollPos, scrollSize, clientSize, trackSize, maxScroll: scrollSize - clientSize }
+}
+
+function calcThumbSize(metrics: Metrics): number {
+  return Math.max((metrics.clientSize / metrics.scrollSize) * metrics.trackSize, MIN_THUMB_SIZE)
+}
+
+function calcThumbPos(scrollPos: number, maxScroll: number, maxThumbPos: number): number {
+  return maxScroll > 0 ? (scrollPos / maxScroll) * maxThumbPos : 0
+}
+
+function calcScrollFromThumb(thumbPos: number, maxThumbPos: number, maxScroll: number): number {
+  return maxThumbPos > 0 ? (thumbPos / maxThumbPos) * maxScroll : 0
+}
+
+function setHasScroll(value: boolean): void {
+  if (hasScroll.value === value) return
   hasScroll.value = value
   emit('update:hasScroll', value)
 }
 
 function resetThumb(): void {
-  thumbTop.value = 0
-  thumbHeight.value = 0
+  thumbPos.value = 0
+  thumbSize.value = 0
 }
 
 function setNoScrollState(): void {
   setHasScroll(false)
   resetThumb()
-}
-
-function getTrackHeight(element: HTMLElement): number {
-  return trackRef.value?.clientHeight ?? element.clientHeight
 }
 
 function update(): void {
@@ -54,8 +116,10 @@ function update(): void {
     return
   }
 
-  const { scrollTop, scrollHeight, clientHeight } = element
-  const canScroll = scrollHeight > clientHeight + 1
+  const config = axis.value
+  const trackSize = getTrackSize(trackRef.value, element, config)
+  const metrics = getMetrics(element, config, trackSize)
+  const canScroll = metrics.maxScroll > 1
 
   setHasScroll(canScroll)
 
@@ -64,13 +128,11 @@ function update(): void {
     return
   }
 
-  const trackHeight = getTrackHeight(element)
-  const nextThumbHeight = Math.max((clientHeight / scrollHeight) * trackHeight, MIN_THUMB_HEIGHT)
-  const maxThumbTop = trackHeight - nextThumbHeight
-  const maxScrollTop = scrollHeight - clientHeight
+  const nextThumbSize = calcThumbSize(metrics)
+  const maxThumbPos = trackSize - nextThumbSize
 
-  thumbHeight.value = nextThumbHeight
-  thumbTop.value = maxScrollTop > 0 ? (scrollTop / maxScrollTop) * maxThumbTop : 0
+  thumbSize.value = nextThumbSize
+  thumbPos.value = calcThumbPos(metrics.scrollPos, metrics.maxScroll, maxThumbPos)
 }
 
 function addDragListeners(): void {
@@ -87,35 +149,33 @@ function handleTrackClick(event: MouseEvent): void {
   const element = props.scrollElement
   const track = trackRef.value
 
-  if (!element || !track) {
-    return
-  }
+  if (!element || !track) return
 
+  const config = axis.value
   const rect = track.getBoundingClientRect()
-  const targetTop = Math.max(
+  const trackSize = rect[config.rectSize]
+  const targetThumbPos = Math.max(
     0,
-    Math.min(event.clientY - rect.top - thumbHeight.value / 2, rect.height - thumbHeight.value),
+    Math.min(event[config.mouseCoord] - rect[config.rectStart] - thumbSize.value / 2, trackSize - thumbSize.value),
   )
-  const maxThumbTop = rect.height - thumbHeight.value
-  const maxScrollTop = element.scrollHeight - element.clientHeight
+  const maxThumbPos = trackSize - thumbSize.value
+  const maxScroll = element[config.scrollSize] - element[config.clientSize]
 
-  element.scrollTop = maxThumbTop > 0 ? (targetTop / maxThumbTop) * maxScrollTop : 0
+  element[config.scrollPos] = calcScrollFromThumb(targetThumbPos, maxThumbPos, maxScroll)
   update()
 }
 
 function handleThumbMouseDown(event: MouseEvent): void {
   const element = props.scrollElement
 
-  if (!element) {
-    return
-  }
+  if (!element) return
 
   event.preventDefault()
   event.stopPropagation()
 
   isDragging.value = true
-  dragStartY = event.clientY
-  dragStartScrollTop = element.scrollTop
+  dragStart = event[axis.value.mouseCoord]
+  dragStartScroll = element[axis.value.scrollPos]
 
   addDragListeners()
 }
@@ -123,78 +183,73 @@ function handleThumbMouseDown(event: MouseEvent): void {
 function handleMouseMove(event: MouseEvent): void {
   const element = props.scrollElement
 
-  if (!element || !isDragging.value) {
-    return
-  }
+  if (!element || !isDragging.value) return
 
-  const maxScrollTop = element.scrollHeight - element.clientHeight
-  const maxThumbTop = getTrackHeight(element) - thumbHeight.value
+  const config = axis.value
+  const trackSize = getTrackSize(trackRef.value, element, config)
+  const metrics = getMetrics(element, config, trackSize)
+  const maxThumbPos = trackSize - thumbSize.value
 
-  if (maxScrollTop <= 0 || maxThumbTop <= 0) {
-    return
-  }
+  if (metrics.maxScroll <= 0 || maxThumbPos <= 0) return
 
-  const deltaY = event.clientY - dragStartY
-  const scrollDelta = (deltaY / maxThumbTop) * maxScrollTop
+  const delta = event[config.mouseCoord] - dragStart
+  const scrollDelta = calcScrollFromThumb(delta, maxThumbPos, metrics.maxScroll)
 
-  element.scrollTop = dragStartScrollTop + scrollDelta
+  element[config.scrollPos] = dragStartScroll + scrollDelta
   update()
 }
 
 function handleMouseUp(): void {
-  if (!isDragging.value) {
-    return
-  }
-
+  if (!isDragging.value) return
   isDragging.value = false
   removeDragListeners()
+}
+
+function cleanupScrollElement(element: HTMLElement | null): void {
+  if (!element) return
+  element.removeEventListener('scroll', update)
+  scrollResizeObserver?.disconnect()
+  scrollResizeObserver = null
+}
+
+function setupScrollElement(element: HTMLElement): void {
+  element.addEventListener('scroll', update)
+  scrollResizeObserver = new ResizeObserver(update)
+  scrollResizeObserver.observe(element)
+  update()
+}
+
+function cleanupTrackObserver(): void {
+  trackResizeObserver?.disconnect()
+  trackResizeObserver = null
+}
+
+function setupTrackObserver(track: HTMLElement): void {
+  trackResizeObserver = new ResizeObserver(update)
+  trackResizeObserver.observe(track)
+  update()
 }
 
 watch(
   () => props.scrollElement,
   (newElement, oldElement) => {
-    if (oldElement) {
-      oldElement.removeEventListener('scroll', update)
-      scrollResizeObserver?.disconnect()
-      scrollResizeObserver = null
-    }
-
-    if (!newElement) {
-      setNoScrollState()
-      return
-    }
-
-    newElement.addEventListener('scroll', update)
-
-    scrollResizeObserver = new ResizeObserver(update)
-    scrollResizeObserver.observe(newElement)
-
-    update()
+    cleanupScrollElement(oldElement ?? null)
+    if (newElement) setupScrollElement(newElement)
+    else setNoScrollState()
   },
   { immediate: true },
 )
 
 watch(trackRef, (newTrack, oldTrack) => {
-  if (oldTrack) {
-    trackResizeObserver?.disconnect()
-    trackResizeObserver = null
-  }
-
-  if (newTrack) {
-    trackResizeObserver = new ResizeObserver(update)
-    trackResizeObserver.observe(newTrack)
-    update()
-  }
+  if (oldTrack) cleanupTrackObserver()
+  if (newTrack) setupTrackObserver(newTrack)
 })
 
 onBeforeUnmount(() => {
-  props.scrollElement?.removeEventListener('scroll', update)
-  scrollResizeObserver?.disconnect()
-  trackResizeObserver?.disconnect()
+  cleanupScrollElement(props.scrollElement)
+  cleanupTrackObserver()
   removeDragListeners()
 })
-
-defineExpose({ update })
 </script>
 
 <template>
@@ -202,15 +257,13 @@ defineExpose({ update })
     v-if="hasScroll"
     ref="trackRef"
     class="custom-scrollbar"
+    :class="`custom-scrollbar--${direction ?? 'vertical'}`"
     @click="handleTrackClick"
   >
     <div
       class="custom-scrollbar__thumb"
       :class="{ 'custom-scrollbar__thumb--dragging': isDragging }"
-      :style="{
-        height: `${thumbHeight}px`,
-        transform: `translateY(${thumbTop}px)`,
-      }"
+      :style="{ [axis.thumbDim]: `${thumbSize}px`, transform: `${axis.transform}(${thumbPos}px)` }"
       @mousedown="handleThumbMouseDown"
     />
   </div>
@@ -219,18 +272,33 @@ defineExpose({ update })
 <style scoped lang="scss">
 .custom-scrollbar {
   position: relative;
-  width: $scrollbar-width;
-  margin-right: $scrollbar-gap-right;
   background: #8f8f8f;
   cursor: pointer;
   user-select: none;
   flex-shrink: 0;
 
+  &--vertical {
+    width: var(--scrollbar-width);
+    margin-right: var(--scrollbar-gap-right);
+
+    .custom-scrollbar__thumb {
+      width: 100%;
+    }
+  }
+
+  &--horizontal {
+    height: var(--scrollbar-width);
+    margin-block: var(--scrollbar-gap);
+
+    .custom-scrollbar__thumb {
+      height: 100%;
+    }
+  }
+
   &__thumb {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
     background: $color-text;
     cursor: pointer;
     transition: background-color 0.15s;
