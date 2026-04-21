@@ -272,7 +272,7 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 .custom-scrollbar {
   position: relative;
-  background: #8f8f8f;
+  background: var(--color-scrollbar-track);
   cursor: pointer;
   user-select: none;
   flex-shrink: 0;
@@ -299,13 +299,13 @@ onBeforeUnmount(() => {
     position: absolute;
     top: 0;
     left: 0;
-    background: $color-text;
+    background: var(--color-scrollbar-thumb);
     cursor: pointer;
     transition: background-color 0.15s;
 
     &:hover,
     &--dragging {
-      background: #111;
+      background: var(--color-scrollbar-thumb-hover);
     }
   }
 }
