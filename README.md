@@ -2,7 +2,7 @@
 
 Test assignment: implement a player stats component based on a design mockup.
 
-**Live demo:** https://radomskaia.github.io/hockey-maneger-test/
+**Live demo:** https://radomskaia.github.io/hockey-manager-test/
 
 ## Stack
 
