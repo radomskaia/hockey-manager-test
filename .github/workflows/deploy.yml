@@ -32,7 +32,7 @@ jobs:
 
       - run: npm run build
         env:
-          VITE_BASE_URL: /hockey-maneger-test/
+          VITE_BASE_URL: /hockey-manager-test/
 
       - uses: actions/configure-pages@v5
 
